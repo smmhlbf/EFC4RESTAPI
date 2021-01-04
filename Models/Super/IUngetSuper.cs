@@ -4,11 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EFC4RESTAPI.Models.Super
 {
     [NotMapped]
-    public record ISuper : IGeneric
+    public record IUngetSuper : IUngetGeneric
     {
-        [Column(Order = 3)]
+        [Required]
         [Display(Name = "有效性")]
         public bool Valid { get; init; }
-        public override IUngetSuper AsUnget() => null;
+
+        public override ISuper AsModel() => null;
     }
 }
