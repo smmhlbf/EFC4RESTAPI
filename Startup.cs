@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EFC4RESTAPI.Repositories;
+using EFC4RESTAPI.Services;
 using EFC4RESTAPI.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,6 +35,8 @@ namespace EFC4RESTAPI
             services.AddDbContext<AppDBContext>(options =>
             options.UseMySql(settings.ConnString, new MySqlServerVersion(new Version(8, 0, 22)),mySqlOptions =>
             mySqlOptions.CharSetBehavior(CharSetBehavior.NeverAppend)).EnableSensitiveDataLogging().EnableDetailedErrors());
+
+            services.AddSingleton<IDBContext, EFCRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
