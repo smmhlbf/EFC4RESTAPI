@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using EFC4RESTAPI.Models;
 using EFC4RESTAPI.Models.Super;
-using EFC4RESTAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace EFC4RESTAPI.Repositories

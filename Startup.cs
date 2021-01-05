@@ -36,7 +36,7 @@ namespace EFC4RESTAPI
             options.UseMySql(settings.ConnString, new MySqlServerVersion(new Version(8, 0, 22)),mySqlOptions =>
             mySqlOptions.CharSetBehavior(CharSetBehavior.NeverAppend)).EnableSensitiveDataLogging().EnableDetailedErrors());
 
-            services.AddSingleton<IDBContext, EFCRepository>();
+            services.AddScoped<IDBContext, EFCRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

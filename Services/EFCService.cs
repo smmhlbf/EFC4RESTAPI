@@ -12,11 +12,15 @@ namespace EFC4RESTAPI.Services
     public enum EditType : int { Add = 0, Modify, Remove }
     public static class EFCService
     {
-        public static async Task<IEnumerable<T>> GetListAsync<T>(this DbSet<T> sets, Func<T, bool> expression = null) where T : ISuper
-        => await (expression is null ? sets.ToListAsync() : sets.Where(expression).AsQueryable<T>().ToListAsync());
+        public static async Task<IEnumerable<T>> GetListAsync<T>(this DbSet<T> sets) where T : ISuper
+        => await sets.ToListAsync();
         public static async Task<T> GetOneAsync<T>(this DbSet<T> sets, Guid id) where T : ISuper
         => await sets.Where(i => i.Id == id).FirstOrDefaultAsync();
         #region Private functions
+        private static IEnumerable<T> GetList<T>(this DbSet<T> sets, Func<T, bool> expression) where T : ISuper
+        => sets.Where(expression);
+        private static async Task<T> GetOneNoTrackingAsync<T>(this DbSet<T> sets, Guid id) where T : ISuper
+        => await sets.AsNoTracking<T>().Where(i => i.Id == id).FirstOrDefaultAsync();
         private static async Task<Tuple<bool, string>> TransactionAsync(this IDbContextTransaction trans, bool success, string message)
         {
             await (success ? trans.CommitAsync() : trans.RollbackAsync());
@@ -46,10 +50,10 @@ namespace EFC4RESTAPI.Services
                     case EditType.Modify: 
                         foreach(var ie in ids_entities)
                         {
-                            if (await sets.GetOneAsync(ie.Item1) != null) es.Append(ie.Item2);
+                            if (await sets.GetOneNoTrackingAsync(ie.Item1) != null) es.Append(ie.Item2);
                         }
                         break;
-                    case EditType.Remove: es = await sets.GetListAsync<T>(i => ids.Contains(i.Id)); break;
+                    case EditType.Remove: es = sets.GetList<T>(i => ids.Contains(i.Id)).ToList(); break;
                 }
                 sets.EditDo<T>(type, es, true);
                 await db.SaveChangesAsync();
@@ -63,10 +67,10 @@ namespace EFC4RESTAPI.Services
                         case EditType.Remove: if ((await sets.Where(j => j.Id == i.Id).FirstOrDefaultAsync()) == null) success.Add(i.Id); break;
                     }
                 }
-                var check = success.Count != (type == EditType.Add ? entities.Count() : (type == EditType.Modify ? ids_entities.Count() : ids.Count()));
+                var check = success.Count == (type == EditType.Add ? entities.Count() : (type == EditType.Modify ? ids_entities.Count() : ids.Count()));
                 return await trans.TransactionAsync(check, $"{title}{(check ? "" : "失败，数据回滚操作")}成功！");
             }
-            catch (Exception) { return await trans.TransactionAsync(false, $"{title}失败，数据胡滚操作成功！"); }
+            catch (Exception) { return await trans.TransactionAsync(false, $"{title}失败，数据回滚操作成功！"); }
         }
         private static async Task<Tuple<bool, string>> EditOneAsync<T>(this AppDBContext db, DbSet<T> sets, EditType type = EditType.Add,
                                                                         T entity = null, Guid? id = null) where T : ISuper

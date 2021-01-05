@@ -12,7 +12,7 @@ namespace EFC4RESTAPI.Services
         // POST 
         Task<Tuple<bool, string>> AddOneAsync<T>(T entity) where T : ISuper;
         // GET
-        Task<IEnumerable<T>> GetListAsync<T>(Func<T, bool> expression = null) where T : ISuper;
+        Task<IEnumerable<T>> GetListAsync<T>() where T : ISuper;
         // GET{id}
         Task<T> GetOneAsync<T>(Guid id) where T : ISuper;
         // Put IEnumerable<Tuple<Guid,T>>
