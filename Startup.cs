@@ -38,7 +38,7 @@ namespace EFC4RESTAPI
 
             services.AddScoped<IDBContext, EFCRepository>();
 
-            services.AddControllers();
+            services.AddControllers(option => { option.SuppressAsyncSuffixInActionNames = false; });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EFC4RESTAPI", Version = "v1" });

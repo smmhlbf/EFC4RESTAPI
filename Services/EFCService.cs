@@ -43,14 +43,14 @@ namespace EFC4RESTAPI.Services
             var title = type.GetTitle();
             try
             {
-                IEnumerable<T> es = new List<T>();
+                List<T> es = new();
                 switch(type)
                 {
-                    case EditType.Add : es = entities; break;
+                    case EditType.Add : es = entities.ToList(); break;
                     case EditType.Modify: 
                         foreach(var ie in ids_entities)
                         {
-                            if (await sets.GetOneNoTrackingAsync(ie.Item1) != null) es.Append(ie.Item2);
+                            if ((await sets.GetOneNoTrackingAsync(ie.Item1)) != null) es.Add(ie.Item2);
                         }
                         break;
                     case EditType.Remove: es = sets.GetList<T>(i => ids.Contains(i.Id)).ToList(); break;
@@ -71,6 +71,7 @@ namespace EFC4RESTAPI.Services
                 return await trans.TransactionAsync(check, $"{title}{(check ? "" : "失败，数据回滚操作")}成功！");
             }
             catch (Exception) { return await trans.TransactionAsync(false, $"{title}失败，数据回滚操作成功！"); }
+            // catch (Exception e) { return await trans.TransactionAsync(false, e.Message.ToString()); }
         }
         private static async Task<Tuple<bool, string>> EditOneAsync<T>(this AppDBContext db, DbSet<T> sets, EditType type = EditType.Add,
                                                                         T entity = null, Guid? id = null) where T : ISuper
